@@ -22,7 +22,7 @@ spec:
 
                   echo "[*] Deleting ImagePullSecrets..."
 
-                  kube_namespaces=($(kubectl get ns  --no-headers -o custom-columns=":metadata.name" | awk '{print $1}'))
+                  kube_namespaces=($(kubectl get ns --no-headers -o custom-columns=":metadata.name" | awk '{print $1}'))
                   
                   for ns in "${kube_namespaces[@]}"
                   do

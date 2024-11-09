@@ -1,6 +1,6 @@
 # K8S AWS TOOLKIT
 
-A simple toolkit package in form of image with k8s and aws tools.
+A simple toolkit package in form of an image with k8s and aws tools.
 
 For using it, you can do:
 
