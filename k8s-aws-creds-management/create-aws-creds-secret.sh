@@ -1,4 +1,5 @@
 kubectl create secret generic aws-credentials \
-  --from-literal=aws_access_key_id=<AWS_ACCESS_KEY_ID> \
-  --from-literal=aws_secret_access_key=<AWS_SECRET_ACCESS_KEY> \
+  --from-literal=AWS_ACCOUNT_ID=<AWS_ACCOUNT_ID> \
+  --from-literal=AWS_ACCESS_KEY_ID=<AWS_ACCESS_KEY_ID> \
+  --from-literal=AWS_SECRET_ACCESS_KEY=<AWS_SECRET_ACCESS_KEY> \
   --namespace acme-system #to be replaced with your namespace
