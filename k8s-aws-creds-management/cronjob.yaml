@@ -20,7 +20,7 @@ spec:
 
                   aws ecr get-login-password --region ${AWS_REGION}
 
-                  echo "[*] Deleting ImagePullSecrets..."
+                  echo "[*] $(date): Deleting ImagePullSecrets..."
 
                   kube_namespaces=($(kubectl get ns --no-headers -o custom-columns=":metadata.name" | awk '{print $1}'))
                   
