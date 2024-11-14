@@ -44,7 +44,7 @@ metadata:
 subjects:
 - kind: ServiceAccount
   name: aws-creds-cronjob-sa
-  namespace: socium-system
+  namespace: acme-system
 roleRef:
   kind: ClusterRole
   name: namespace-reader-cr
