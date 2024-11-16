@@ -31,9 +31,12 @@ kind: ClusterRole
 metadata:
   name: namespace-reader-cr
 rules:
-- apiGroups: ["*"]
+- apiGroups: [""]
   resources: ["namespaces"]
-  verbs: ["get", "list"]
+  verbs: ["get", "list", "update"]
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["create", "delete"]
 
 ---
 

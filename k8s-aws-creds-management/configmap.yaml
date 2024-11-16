@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aws-creds-config
+  namespace: acme-system
+data:
+  AWS_REGION: eu-west-2
+  IMG_PULL_SECRET_NAME: aws-ecr-registry-creds
+  SECRETS_UPDATE_SCRIPT.sh: |
+    #!/usr/bin/env bash
+
+    echo "********************************"
+    echo "*         AWS VERSION          *"
+    aws --version
+    aws ecr get-login-password --region ${AWS_REGION}
+    echo "********************************"
+    
+    echo "[*] $(date): Updating ImagePullSecrets..."
+    
+    kube_namespaces=($(kubectl get ns --no-headers -o custom-columns=":metadata.name" | grep acme))
+    for ns in "${kube_namespaces[@]}" 
+    do 
+      :
+      echo "[*] $(date): Updating secret for namespace - ${ns}"
+      kubectl delete secret -n ${ns} --ignore-not-found ${SECRET_NAME}
+      echo "[*] Recreating ImagePullSecrets..."
+      kubectl create secret docker-registry ${SECRET_NAME} \
+      --docker-server=https://${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com \
+      --docker-username=AWS \
+      --docker-password=$(aws ecr get-login-password --region ${AWS_REGION}) \
+      --namespace=${ns}
+      echo "[*] Secret recreated !!!"
+    done
+    
+    echo "[*] $(date): All ImagePullSecrets updated for all namespaces."

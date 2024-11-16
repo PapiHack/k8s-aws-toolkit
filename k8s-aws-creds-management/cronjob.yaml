@@ -5,45 +5,31 @@ metadata:
   namespace: acme-system
 spec:
   schedule: 0 */11 * * *
+  # schedule: "* * * * *"
+  successfulJobsHistoryLimit: 2
+  suspend: false
   jobTemplate:
     spec:
       template:
         spec:
           containers:
             - name: ecr-creds-refresh
-              image: papihack/k8s-aws-toolkit:naruto
+              image: papihack/k8s-aws-toolkit:sasuke
               command:
-                - /bin/sh
-                - '-c'
-                - >-
-                  aws --version 
-
-                  aws ecr get-login-password --region ${AWS_REGION}
-
-                  echo "[*] $(date): Deleting ImagePullSecrets..."
-
-                  kube_namespaces=($(kubectl get ns --no-headers -o custom-columns=":metadata.name" | awk '{print $1}'))
-                  
-                  for ns in "${kube_namespaces[@]}"
-                  do
-                    :
-                    echo "[*] $(date): Updating secret for namespace - ${ns}"
-                    kubectl delete secret -n ${ns} --ignore-not-found ${SECRET_NAME}
-                    echo "[*] Recreating ImagePullSecrets..."
-                    kubectl create secret -n ${ns} docker-registry ${SECRET_NAME} \
-                    --docker-server=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com \
-                    --docker-username=AWS \
-                    --docker-password="$(aws ecr get-login-password --region ${AWS_REGION})" 
-                    echo "[*] Secret recreated !!!"
-                  done
-
-                  echo "[*] $(date): All ImagePullSecrets updated for all namespaces."
-
+                # - /bin/bash
+                # - '-c'
+                - '/usr/local/scripts/SECRETS_UPDATE_SCRIPT.sh'
               env:
                 - name: AWS_REGION
-                  value: us-west-2
+                  valueFrom:
+                    configMapKeyRef:
+                      name: aws-creds-config
+                      key: AWS_REGION
                 - name: SECRET_NAME
-                  value: aws-ecr-registry-creds # secret name
+                  valueFrom:
+                    configMapKeyRef:
+                      name: aws-creds-config
+                      key: IMG_PULL_SECRET_NAME
                 - name: AWS_ACCOUNT_ID
                   valueFrom:
                     secretKeyRef:
@@ -59,7 +45,16 @@ spec:
                     secretKeyRef:
                       name: aws-credentials
                       key: AWS_SECRET_ACCESS_KEY
+              volumeMounts:
+              - name: secrets-update-script
+                mountPath: "/usr/local/scripts"
+                readOnly: false
               imagePullPolicy: IfNotPresent
+          volumes:
+            - name: secrets-update-script
+              configMap:
+                name: aws-creds-config
+                defaultMode: 0777
           restartPolicy: OnFailure
           serviceAccountName: aws-creds-cronjob-sa
           serviceAccount: aws-creds-cronjob-sa
